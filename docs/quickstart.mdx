@@ -1,0 +1,116 @@
+---
+sidebar_position: 2
+---
+import Link from '@docusaurus/Link';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Neuralk SDK Quickstart
+
+The Neuralk SDK is a python library that provides a simple interface to the state-of-the-art foundation models & expert modules accessible via the Neuralk API. Get started by generating your access credentials and running your first API call.
+
+
+<Link
+  className="button button--secondary button--quickstart"
+  to="https://www.neuralk-ai.com/request-credentials?utm_source=documentation&utm_medium=quickstart-button&utm_campaign=friendly-launch"
+>
+ Generate credentials
+</Link>
+
+##  Load credentials 
+
+To connect to the Neuralk API, you need to authenticate with your credentials. Instead of hardcoding them, you can store them securely in environment variables.
+
+The most common approaches are:
+
+### 1. Environment variables in the operating system
+
+<Tabs>
+  <TabItem value="linux/macos" label="Linux/macOS">
+    ```bash
+    export NEURALK_USERNAME=your_username
+    export NEURALK_PASSWORD=your_password
+    ```
+  </TabItem>
+  <TabItem value="windows" label="Windows">
+    ```bash 
+    set NEURALK_USERNAME=your_username
+    set NEURALK_PASSWORD=your_password
+    ```
+  </TabItem>
+</Tabs>
+
+### 2. Using a .env file (useful during development)
+
+
+Many Python projects use environment variables to store sensitive information like API keys or configuration settings. Create a file named `.env` in the root of your project with:
+```bash title=".env"
+NEURALK_USERNAME=your_username
+NEURALK_PASSWORD=your_password
+```
+
+To access these variables in your scripts, you can use the `python-dotenv` package. First, install it with `pip install python-dotenv`. 
+
+Then, at the start of your script, load your environment variables using `dotenv`:
+```python
+import dotenv
+dotenv.load_dotenv()
+```
+
+Don’t forget to add `.env` to your `.gitignore` to avoid committing it.
+
+## Install the Neuralk SDK and run your first prediction
+
+The Neuralk SDK is available on PyPI and can be installed using pip. This is the recommended installation method for users who want to integrate the SDK into their Python projects.
+
+```bash title="Install the SDK with pip"
+pip install neuralk
+```
+
+### Verifying your installation
+
+You can verify that the Neuralk package was installed correctly by importing it in your terminal:
+
+```bash title="Test installation in your terminal"
+python -c "import neuralk; print('Neuralk imported successfully')"
+```
+If you see the message above, the installation was successful.
+
+Next, you can create a test file, e.g., `toy.py`, and copy the example code into it to run a simple classification.
+
+
+```python title="Test a toy classification example"
+import time
+
+import dotenv
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+from neuralk import Classifier
+
+dotenv.load_dotenv()
+
+X, y = make_classification(random_state=0, n_samples=1_000, n_features=10)
+X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+start = time.monotonic()
+classif = Classifier()
+classif.fit(X_train, y_train)
+prediction = classif.predict(X_test)
+stop = time.monotonic()
+print(f"fit & predict took {stop - start:.1f}s")
+print(prediction.ravel())
+print(f"{X_train.shape=} {X_test.shape=} {y_train.shape=} {y_test.shape=} {prediction.shape=}")
+print("accuracy:", accuracy_score(y_test, prediction))
+```
+Run the code by executing `python toy.py`. After a few moments, the results of your API request should appear.
+
+This lets you quickly check that the SDK is working before moving on to your own projects.
+
+<Link
+  className="button button--secondary button--quickstart"
+  to="/docs/classification"
+>
+ Explore more classification examples
+</Link>

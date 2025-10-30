@@ -1,0 +1,90 @@
+---
+sidebar_position: 3
+---
+
+import Link from '@docusaurus/Link';
+
+
+# Neuralk AI Tabular Foundation Models
+
+At Neuralk AI we develop powerful TFMs specifically purpose-built for industry applications, delivering state-of-the-art accuracy on real-world ML tasks across commerce, finance, healthcare and beyond. Below we give more details on its usage, limitations and setup recommendations.
+
+<Link
+  className="button button--secondary button--quickstart"
+  to="/docs/classification"
+>
+ Get started
+</Link>
+
+## NICL (Neuralk In-Context Learning)
+NICL is designed for tabular prediction tasks (classification) where patterns can be inferred directly from the data distribution without extensive model tuning.  
+
+### Size of input 
+
+NICL performs best on datasets with up to 250 features and 15,000 samples, offering reliable and consistent performance out of the box.  
+
+For larger problems, NICL can scale to 1 million samples and 500 features, though performance may vary depending on input complexity.  
+
+### When to use 
+
+NICL is ideal when you:
+
+- Need strong baseline performance without hyper-parameter tuning.
+- Want a unified approach to handle mixed feature types.
+- Are exploring new datasets and want fast iteration.
+- Prefer interpretability and flexible prompting over black-box optimisation.
+
+### In-Context Learning (ICL)
+
+In-Context Learning (ICL) is a process where a model makes predictions based on contextual examples provided directly within the input, rather than by updating its internal parameters through traditional training methods. This approach is particularly advantageous in situations where labeled data is scarce or frequently changing.
+
+For models such as NICL, this means that a small set of input–output pairs, the context acts as a description of the task at hand. The model uses this contextual information to infer relationships and predict outcomes for new samples. In doing so, it effectively adapts to new datasets without further model retraining.
+
+#### Context (TFMs) vs Prompts (LLMs): what's the difference?
+
+In-Context Learning in models like NICL is conceptually similar to how Large Language Models (LLMs) use prompts. In both cases, the model does not update its internal parameters but instead conditions its predictions on the information provided in the input. For an LLM, the prompt is a set of  examples, instructions, or context and it defines the task and guides the model’s next output. Likewise, in NICL, the context of labeled examples serves as a prompt that betters defines the task and guides the model’s predictions.
+
+Both approaches rely on the model’s ability to interpret patterns from context and generalise to unseen instances, demonstrating a shared principle: learning and running inferences directly from input rather than through explicit retraining.
+
+### Limitations
+
+While NICL provides excellent generalisation across a wide range of datasets for very high-dimensional or sparse data (e.g., text bag-of-words, one-hot expansions) it may require further preprocessing steps to achieve optimal performance.
+
+### Data Preparation
+
+NICL is designed to work with minimal preprocessing. In most cases, you can pass your dataset as a clean tabular structure (e.g., pandas DataFrame) and obtain strong performance.  
+
+However, you can improve accuracy and stability by following a few simple practices:
+
+- Handle missing values (imputation or explicit missing indicators).
+- Encode categorical features as integers consistently across training and inference.
+- Keep feature semantics consistent between training and prediction.
+
+*Expert-based preprocessing or domain-specific feature engineering can further enhance results, but NICL is intentionally built to work well “as is.”*
+
+### Maximising Correctness
+
+Unlike traditional ML models, NICL does not rely on hyper-parameter tuning or fine-tuning. Instead, its performance can often be improved through prompt design and context specification.  
+
+When working with NICL:
+
+- Include representative samples to help NICL infer feature importance and relationships.
+- Experiment with context to help NICL focus on the most relevant aspects of your data.
+
+*Think of NICL as a reasoning engine for tabular data: the clearer the context, the more accurate the inference.*
+
+### Balancing Sample Size and Context Window
+
+NICL operates within a finite context window, typically up to a few hundred thousand rows. This means more examples are not always better. The best performance often comes from a compact, informative subset rather than a full dataset dump.
+
+- Too few samples: might lead to underfitting and poor generalization.
+- Too many samples: might cause context dilution, slow down inference and introduce noise.
+- Optimal: give diverse, non-redundant examples as context.
+
+:::tip
+A practical heuristic: Start with 1,000–100,000 representative samples. Increase gradually until you reach diminishing returns.
+:::
+
+:::note
+ While NICL currently operates on numerical inputs, future versions coming soon will include native support for textual data.
+:::

@@ -1,0 +1,33 @@
+.bd-header-announcement {
+  background-color: #1B998B;
+  display: none;
+}
+
+.bd-header-announcement a {
+  color: #DCD2C9;
+}
+
+.bd-header {
+  display: none;
+}
+
+ul.bd-breadcrumbs, .header-article__inner, .prev-next-area {
+  display: none;
+}
+
+.bd-sidebar-primary {
+  top: 0rem;
+}
+
+:root {
+  --pst-font-size-h1: 2rem;
+}
+
+.sig-name, a:hover, a:visited {
+  color: #267865 !important; 
+}
+
+.bd-footer {
+  display: none;
+}
+

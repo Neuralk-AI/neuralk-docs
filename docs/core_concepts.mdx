@@ -1,0 +1,205 @@
+---
+sidebar_position: 2
+---
+import Link from '@docusaurus/Link';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Expert AI Modules: core concepts
+
+The Neuralk SDK for Expert AI modules is built around two main concepts:
+- Model objects: Data structures that represent a static view of API objects that are essential for an expert AI module: `Projects, ProjectFile, Datasets, Analysis, User`
+- Handlers: High-level methods that interact with the Neuralk API: [`ProjectHandler`](#project-handler), [`ProjectFileHandler`](#project-file-handler), [`DatasetHandler`](#dataset-handler), [`AnalysisHandler`](#analysis-handler)
+- All functionality is accessible through a single `Neuralk` client instance.
+
+These are the high-level steps essential for each workflow:
+- Authentication - Connect to the platform
+- Project Creation - Set up your workspace
+- Dataset Upload - Add your data
+- Analysis Execution - Launch an expert analysis
+- Results Retrieval - Get your results
+
+## Core Model objects
+
+The Neuralk SDK uses structured data models to represent different objects, providing easy access to object properties and relationships.
+
+```python
+class Project:
+    id: str                    # Unique project identifier
+    name: str                  # Project display name
+    dataset_list: list[Dataset]           # Datasets in this project
+    user_list: list[tuple[str, User]]     # Users with access (role, user)
+    project_file_list: list[ProjectFile]  # Files in this project
+    analysis_list: list[Analysis]         # Analyses in this project
+
+class Dataset:
+    id: str                    # Unique dataset identifier
+    name: str                  # Dataset display name
+    file_name: str             # Filename
+    analysis_list: list[Analysis]         # Analyses using this dataset
+
+class Analysis:
+    id: str                    # Unique analysis identifier
+    name: str                  # Analysis display name
+    advancement: int           # Progress percentage (0-100)
+    error: str                 # Error message if failed
+    status: str                # Current status (IN PENDING, IN RUNNING, SUCCEEDED, FAILED)
+
+class User:
+    id: str                    # Unique user identifier
+    email: str                 # User's email address
+    firstname: str             # User's first name
+    lastname: str              # User's last name
+
+class ProjectFile:
+    id: str                    # Unique file identifier
+    name: str                  # File display name
+    file_name: str             # Original filename
+
+```
+
+##  Handlers
+
+Handlers provide the main interface for interacting with different aspects of the API.
+
+### Project Handler
+
+The `ProjectHandler` allows you to create, retrieve, list and delete projects.
+
+```python 
+
+# Create a new project
+project = client.projects.create(name="My Project")
+
+# Retrieve an existing project
+project = client.projects.get("<project_id>")
+
+# List all your projects
+projects = client.projects.get_list()
+
+# Delete a project (use with caution!)
+client.projects.delete(project)
+
+# Manage project access
+client.projects.add_user(project, user_email="user@example.com", role="owner")
+client.projects.delete_user(project, user_email="user@example.com")
+users = client.projects.list_user(project)
+
+```
+
+###  Dataset Handler
+
+The `DatasetHandler`allows you to create, retrieve, list and delete datasets.
+
+
+```python 
+
+# Upload a dataset to a project
+dataset = client.datasets.create(
+    project=project,
+    name="My Dataset",
+    file_path="/path/to/data.csv",
+)
+
+# Retrieve an existing dataset
+dataset = client.datasets.get(dataset)
+
+# Delete a dataset
+client.datasets.delete(dataset)
+
+```
+
+### Project File Handler
+
+The `ProjectFileHandler` allows you to create, retrieve, list and delete business files, such as taxonomies.
+
+```python 
+# Upload a taxonomy file
+project_file = client.project_files.create(
+    project=project,
+    name="product_taxonomy.json",
+    file_path="/path/to/taxonomy.json",
+)
+
+# Remove a file
+client.project_files.delete(project_file)
+
+```
+
+
+### Analysis Handler
+
+The `AnalysisHandler` allows you to create, monitor, fetch analyses and download the associated results.
+
+
+```python 
+# Categorization Fit
+categorizer_fit = client.analysis.create_categorization_fit(
+    dataset=dataset,
+    name="My Categorization Fit",
+    taxonomy_file=project_file,  # Optional
+    target_columns="target_columns",  # Optional
+    id_columns=["id_col"],  # Optional
+    categorizer_feature_cols=["cat_col1"]  # Optional
+)
+
+# Use the trained analysis for predictions
+categorizer_predict = client.analysis.create_categorization_predict(
+    dataset=dataset,
+    name="My Categorizer Predict",
+    categorization_fit_analysis=categorizer_fit
+)
+```
+
+:::tip
+Always call `client.logout()` when done to invalidate your session
+
+Use `role` appropriately when assigning users to projects
+
+Use `refresh_time` and `verbose` to monitor the progress of analyses while running
+:::
+
+## Example
+
+Below we show a basic example that demonstrates the typical workflow:
+
+```python example.py
+from neuralk import Neuralk
+
+# 1. Authenticate
+client = Neuralk(user_id="your_user_id", password="your_password")
+
+# 2. Create a project (or use an existing one)
+project = client.projects.create(name="My First Project")
+
+# 3. Upload a dataset to your project
+dataset = client.datasets.create(
+    project=project,
+    name="Sample Dataset",
+    file_path="/path/to/your_data.csv",
+)
+
+# 4. Launch an analysis to fit a classifier
+classifier_fit = client.analysis.create_classifier_fit(
+    dataset=dataset,
+    name="My Classifier Fit",
+    target_column="target_column_name",
+    id_columns=["id_column_name"],  # Optional
+    feature_column_name_list=["feature1", "feature2"]  # Optional
+)
+
+# 5. Monitor the analysis progress
+classifier_fit = client.analysis.wait_until_complete(
+    classifier_fit,
+    refresh_time=10,  # Check progress every 10 seconds
+    verbose=True      # Display progress updates
+)
+
+# 6. Download the results to your local machine
+client.analysis.download_results(classifier_fit, folder_path="./results/")
+
+# 7. Logout when done
+client.logout()
+
+
+```

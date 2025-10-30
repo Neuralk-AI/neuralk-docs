@@ -1,0 +1,300 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #43b69c;
+  --ifm-color-primary-dark: #359b83;
+  --ifm-color-primary-darker: #267865;
+  --ifm-color-primary-darkest: #196150;
+  --ifm-color-primary-light: #43b69c;
+  --ifm-color-primary-lighter: #56c9ae;
+  --ifm-color-primary-lightest: #6cd8bf;
+
+  --ifm-code-font-size: 95%;
+
+  --ifm-font-size-base: 95%;
+
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  
+  --doc-sidebar-width: 230px;
+
+  --ifm-container-width-xl: 1600px;
+
+  h1 {
+    font-size: 30px !important;
+    font-weight: 600 !important;
+  }
+
+  h2 {
+    font-size: 25px !important;
+    font-weight: 600 !important;
+  }
+
+  h3, h4 {
+    font-weight: 600 !important;
+  }
+
+  h3 {
+    font-size: 18px !important;
+  }
+
+}
+
+
+.navbar__logo {
+  height: 3rem;
+}
+
+/* start -- table of contents */
+
+.onthispage {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0;
+}
+
+@layer docusaurus.infima {
+  .table-of-contents {
+    font-size: 1rem;
+  }
+}
+
+/* end -- table of contents */
+
+
+
+
+@layer docusaurus.infima {
+  .navbar--fixed-top {
+    box-shadow: none;
+  }
+}
+
+.docSidebarContainer_YfHR {
+    border: none !important;
+}
+
+
+[data-theme='light'] {
+  .docMainContainer_TBSr {
+    background: #f3f3f3;
+  }
+  .docSidebarContainer_YfHR {
+    background-color: #f3f3f3;
+  }
+  .navbar--fixed-top {
+    background-color: #f3f3f3;
+  }
+  @layer docusaurus.theme-classic {
+    @media (min-width: 997px) {
+      @layer docusaurus.infima {
+        .container {
+          background-color: white;
+          border: 1px solid #ebeceb;
+          border-radius: 10px;
+        }
+      }
+    }
+  }
+
+  .menu__link--active {
+    background-color: #43b69b27;
+    border-radius: 0.5rem;
+    color: #318a76;
+  }
+
+  .sidebar-getting-started {
+    /* text-transform: uppercase; */
+    color: #0d0d0d;
+  }
+}
+
+/* sidebar */
+@layer docusaurus.infima {
+  .navbar__brand {
+    margin-left: 0.5rem;
+  }
+
+  .menu__link, .navbar__link {
+    font-size: 95%;
+  }
+}
+
+.menu__link--active {
+   /* background-color: #43b69b27; */
+   border-radius: 0.5rem;
+   /* color: black; */
+}
+
+.sidebar-getting-started {
+  /* text-transform: uppercase; */
+  font-size: 95%;
+  font-weight: 600;
+}
+
+.docSidebarContainer_YfHR {
+    /* padding-right: 1rem !important;  */
+    border:none
+}
+
+@layer docusaurus.theme-classic {
+  @media (min-width: 997px) {
+    @supports (scrollbar-gutter: stable) {
+      .menu_SIkG {
+        padding: 1rem !important;
+      }
+    }
+
+    @layer docusaurus.infima {
+      .container {
+        /* background-color: white; */
+        border: 1px solid #323232;
+        border-radius: 10px;
+      }
+
+      .footer { 
+        background-color: black;
+
+      .container {
+        background-color: transparent;
+        border: none !important;
+      }
+      }
+
+      .padding-top--md {
+        padding-left: 8rem;
+        padding-right: 8rem;
+      }
+    }
+    
+  }
+}
+
+@layer docusaurus.infima {
+  .padding-top--md {
+    padding-top: 3rem !important;
+  }
+}
+
+
+/* buttons */
+
+.button.button--quickstart {
+    border-radius: 1.5rem;
+    background-color: var(--ifm-color-primary-darker);
+    p {
+      margin-bottom: 0;
+    }
+}
+
+@layer docusaurus.infima {
+  .button.button--primary {
+    border-radius: 0.5rem;
+    background-color: #e1e1e1;
+    border: unset;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    /* font-size: unset; */
+    .iconExternalLink_nPIU {
+      display: none;
+    }
+  }
+
+  .button.button--secondary {
+    /* font-size: unset; */
+    color: white;
+    /* color: white; */
+    border-radius: 0.5rem;
+    border: unset;
+    margin-right: 1rem;
+    background-color: var(--ifm-color-primary-darker);
+    .iconExternalLink_nPIU {
+      display: none;
+    }
+  }
+
+  .button.button--primary:hover {
+    color: unset;
+  }
+}
+
+.breadcrumbs {
+  display: none;
+}
+
+/* search button */
+
+@media (min-width: 997px) {
+    .navbarSearchContainer_Bca1 {
+        position: absolute;
+        top: 120%;
+        left: 0.5%;
+        width: 220px;
+    }
+
+    .sidebar_njMd {
+        padding-top: 6rem !important;
+    }
+  
+}
+
+.aa-DetachedSearchButton {
+  border-radius: 0.5rem !important;
+  border: 1px solid transparent !important;
+  background-color: rgb(233, 233, 233) !important;
+  width: 100% !important;
+}
+
+.aa-DetachedSearchButtonIcon {
+  color: rgb(180, 180, 180)  !important; 
+  width: 0.8rem !important;
+  margin-left: 0.5rem !important;
+  margin-right: 0.5rem !important;
+}
+
+div.aa-DetachedSearchButtonPlaceholder {
+  font-size: 85% !important;
+  margin-right: 0.5rem !important;
+}
+
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #43b69c;
+  --ifm-color-primary-dark: #359b83;
+  --ifm-color-primary-darker: #267865;
+  --ifm-color-primary-darkest: #196150;
+  --ifm-color-primary-light: #43b69c;
+  --ifm-color-primary-lighter: #56c9ae;
+  --ifm-color-primary-lightest: #6cd8bf;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+
+  .navbar--fixed-top {
+    background-color: #1b1b1d;
+  }
+
+  @layer docusaurus.infima {
+    .button.button--primary {
+      color: black;
+    }
+
+    .button.button--primary:hover {
+      color: black;
+    }
+  }
+
+  .aa-DetachedSearchButton {
+      color: black;
+  }
+
+  .aa-DetachedSearchButton, .aa-DetachedSearchButtonIcon {
+      background-color: #262628 !important;
+      color: #6e6e6e !important ;
+  }
+
+}
+
