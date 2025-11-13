@@ -1,1 +1,0 @@
-"use strict";(globalThis.webpackChunkdocs_neuralk=globalThis.webpackChunkdocs_neuralk||[]).push([[9693],{5418:e=>{e.exports=JSON.parse('{"name":"docusaurus-plugin-content-docs","id":"api-reference"}')}}]);
