@@ -78,27 +78,27 @@ const sidebars = {
     {
       type: 'doc',
       label: 'Using the Classifier',
-      id: '0010_housing_classification',
+      id: 'housing_classification',
     },
     {
       type: 'doc',
       label: 'Controlling sampling context',
-      id: '0020_selecting_sampling_context',
+      id: 'selecting_sampling_context',
     },
     {
       type: 'doc',
       label: 'Classification Expert Module',
-      id: '0030_two_moon_classification',
+      id: 'two_moon_classification',
     },
     {
       type: 'doc',
       label: 'Categorization Expert Module',
-      id: '0040_categorization',
+      id: 'categorization',
     },
     {
       type: 'doc',
       label: 'On-Premise Classifier',
-      id: '0050_on_premise_classifier',
+      id: 'on_premise_classifier',
     },
     // {
     //   type: 'category',
