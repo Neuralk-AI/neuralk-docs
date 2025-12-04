@@ -163,6 +163,10 @@ def convert_file(basename: str) -> None:
     mdx_path.write_text(new_content, encoding='utf-8')
     print(f"✅ Created {mdx_path.name}")
 
+    # Remove .md file to avoid duplicate doc IDs
+    md_path.unlink()
+    print(f"🗑️  Removed {md_path.name}")
+
 
 def main():
     print("Converting Sphinx-Gallery markdown to MDX with TOC...\n")
