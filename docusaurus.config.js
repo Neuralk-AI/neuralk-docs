@@ -40,7 +40,11 @@ const config = {
     locales: ['en'],
   },
 
-  
+  // Use 'detect' to parse .md files as plain markdown (not MDX)
+  // This prevents MDX from misinterpreting HTML in Sphinx-generated docs
+  markdown: {
+    format: 'detect',
+  },
 
   presets: [
     [
