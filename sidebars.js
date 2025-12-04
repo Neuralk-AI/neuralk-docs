@@ -77,13 +77,28 @@ const sidebars = {
     },
     {
       type: 'doc',
-      label: 'Categorization module',
-      id: 'plot_categorization',
+      label: 'Using the Classifier',
+      id: '0010_housing_classification',
     },
-   {
+    {
       type: 'doc',
-      label: 'Classification module',
-      id: 'plot_two_moon_classification',
+      label: 'Controlling sampling context',
+      id: '0020_selecting_sampling_context',
+    },
+    {
+      type: 'doc',
+      label: 'Classification Expert Module',
+      id: '0030_two_moon_classification',
+    },
+    {
+      type: 'doc',
+      label: 'Categorization Expert Module',
+      id: '0040_categorization',
+    },
+    {
+      type: 'doc',
+      label: 'On-Premise Classifier',
+      id: '0050_on_premise_classifier',
     },
     // {
     //   type: 'category',
