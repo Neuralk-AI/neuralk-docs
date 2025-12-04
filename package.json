@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "prestart": "python3 scripts/convert_examples.py",
-    "prebuild": "python3 scripts/convert_examples.py",
+    "prestart": "python3 scripts/convert_to_mdx.py",
+    "prebuild": "python3 scripts/convert_to_mdx.py",
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
     "build": "docusaurus build",
