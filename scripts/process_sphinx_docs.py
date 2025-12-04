@@ -164,6 +164,10 @@ def process_file(basename: str) -> None:
     dst_path.write_text(new_content, encoding='utf-8')
     print(f"✅ Created {dst_path.name}")
 
+    # Remove original to avoid duplicate doc IDs
+    src_path.unlink()
+    print(f"🗑️  Removed {src_path.name}")
+
 
 def main():
     print("Processing Sphinx-Gallery markdown files...\n")
