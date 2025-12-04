@@ -3,9 +3,9 @@
 Process Sphinx-Gallery generated markdown files for Docusaurus.
 
 This script:
-1. Strips HTML output (sklearn estimators, pandas DataFrames, etc.)
-2. Fixes API links from Sphinx format to Docusaurus format
-3. Keeps code blocks and text content
+1. Extracts HTML output blocks (sklearn estimators, skrub TableReport, etc.) to separate HTML files
+2. Replaces them with iframes in the markdown
+3. Fixes API links and unescapes Sphinx-escaped characters
 """
 
 import re
@@ -22,119 +22,94 @@ SPHINX_GALLERY_FILES = [
 ]
 
 DOCS_DIR = Path(__file__).parent.parent / "docs"
+STATIC_DIR = Path(__file__).parent.parent / "static" / "html_outputs"
 
 
-def strip_html(content: str) -> str:
+def unescape_sphinx(content: str) -> str:
+    """Unescape characters that Sphinx escaped in the markdown."""
+    # Unescape: \* -> *, \_ -> _, \{ -> {, \} -> }, \` -> `
+    content = content.replace(r'\*', '*')
+    content = content.replace(r'\_', '_')
+    content = content.replace(r'\{', '{')
+    content = content.replace(r'\}', '}')
+    content = content.replace(r'\[', '[')
+    content = content.replace(r'\]', ']')
+    content = content.replace(r'\`', '`')
+    return content
+
+
+def extract_html_blocks(content: str, basename: str) -> tuple[str, list[Path]]:
     """
-    Strip HTML blocks from content while preserving markdown and code blocks.
+    Extract HTML output blocks from content, save to files, replace with iframes.
+
+    Sphinx-Gallery output blocks start with <div class="output_subarea ...">
+    and end right before <br /> tags.
     """
-    lines = content.split('\n')
-    result = []
-    in_code_block = False
-    in_html_block = False
-    html_tag_stack = []
+    STATIC_DIR.mkdir(parents=True, exist_ok=True)
+    html_files = []
+    html_block_count = 0
 
-    i = 0
-    while i < len(lines):
-        line = lines[i]
+    # Unescape Sphinx escapes first
+    content = unescape_sphinx(content)
 
-        # Track code blocks (preserve these)
-        if line.startswith('```'):
-            in_code_block = not in_code_block
-            result.append(line)
-            i += 1
-            continue
+    # Find all <div class="output_subarea ..."> blocks
+    # These end right before <br /> tags
+    pattern = r'<div\s+class="output_subarea[^"]*"[^>]*>'
+    result_parts = []
+    last_end = 0
 
-        # Inside code block - keep everything
-        if in_code_block:
-            result.append(line)
-            i += 1
-            continue
+    for match in re.finditer(pattern, content):
+        start = match.start()
+        result_parts.append(content[last_end:start])
 
-        # Detect start of HTML blocks we want to remove
-        # Style blocks
-        if re.match(r'^\s*<style', line, re.IGNORECASE):
-            in_html_block = True
-            i += 1
-            continue
+        # Find the end - look for <br /> which follows output blocks
+        remaining = content[start:]
+        br_match = re.search(r'\n<br />', remaining)
 
-        if in_html_block and re.search(r'</style>', line, re.IGNORECASE):
-            in_html_block = False
-            i += 1
-            continue
+        if br_match:
+            end_offset = br_match.start()
+            html_block = remaining[:end_offset].rstrip()
+            html_block_count += 1
 
-        # Skip lines that are purely HTML div/span blocks (sklearn output)
-        if re.match(r'^\s*<div\s+[^>]*(?:sk-|sklearn|class=)[^>]*>', line, re.IGNORECASE):
-            # Find closing tag - could be multi-line
-            depth = 1
-            i += 1
-            while i < len(lines) and depth > 0:
-                if '<div' in lines[i].lower():
-                    depth += lines[i].lower().count('<div')
-                if '</div>' in lines[i].lower():
-                    depth -= lines[i].lower().count('</div>')
-                i += 1
-            continue
+            # Determine iframe height based on content type
+            if 'report_' in html_block and '-wrapper' in html_block:
+                height = 500  # TableReport - taller
+            else:
+                height = 150  # sklearn estimator - shorter
 
-        # Skip raw HTML table blocks (pandas output)
-        if re.match(r'^\s*<div[^>]*>\s*$', line) or re.match(r'^\s*<table', line, re.IGNORECASE):
-            depth = 1
-            tag = 'div' if '<div' in line.lower() else 'table'
-            i += 1
-            while i < len(lines) and depth > 0:
-                if f'<{tag}' in lines[i].lower():
-                    depth += lines[i].lower().count(f'<{tag}')
-                if f'</{tag}>' in lines[i].lower():
-                    depth -= lines[i].lower().count(f'</{tag}>')
-                i += 1
-            continue
+            # Save to file
+            html_filename = f"{basename}_output_{html_block_count}.html"
+            html_path = STATIC_DIR / html_filename
+            full_html = f'''<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+</head>
+<body>
+{html_block}
+</body>
+</html>'''
+            html_path.write_text(full_html, encoding='utf-8')
+            html_files.append(html_path)
 
-        # Skip standalone HTML tags and CSS
-        if re.match(r'^\s*</?(?:style|div|span|table|tr|td|th|thead|tbody|iframe|script)[^>]*>?\s*$', line, re.IGNORECASE):
-            i += 1
-            continue
+            # Replace with iframe
+            result_parts.append(
+                f'<iframe src="/html_outputs/{html_filename}" width="100%" '
+                f'height="{height}" style="border:1px solid #ddd; border-radius: 4px;"></iframe>\n'
+            )
+            last_end = start + end_offset
+        else:
+            # No <br /> found, keep original
+            result_parts.append(match.group(0))
+            last_end = match.end()
 
-        # Skip lines that look like CSS rules
-        if re.match(r'^\s*[#.@]?[\w-]+\s*\{', line) or re.match(r'^\s*[\w-]+\s*:', line) and not line.strip().startswith('#'):
-            i += 1
-            continue
-
-        # Skip raw CSS property lines
-        if re.match(r'^\s*--[\w-]+:', line):
-            i += 1
-            continue
-
-        # Skip closing braces from CSS
-        if re.match(r'^\s*\}\s*$', line):
-            i += 1
-            continue
-
-        if in_html_block:
-            i += 1
-            continue
-
-        # Keep this line
-        result.append(line)
-        i += 1
-
-    # Clean up multiple blank lines
-    cleaned = []
-    prev_blank = False
-    for line in result:
-        is_blank = line.strip() == ''
-        if is_blank and prev_blank:
-            continue
-        cleaned.append(line)
-        prev_blank = is_blank
-
-    return '\n'.join(cleaned)
+    result_parts.append(content[last_end:])
+    return ''.join(result_parts), html_files
 
 
 def fix_links(content: str) -> str:
-    """
-    Fix Sphinx-generated links to match Docusaurus structure.
-    """
-    # Fix relative api links to absolute api-reference links
+    """Fix Sphinx-generated links to match Docusaurus structure."""
+    # Fix relative api links
     content = re.sub(
         r'\.\./api/generated/([^)#\s]+)\.md(?:#[^)]*)?',
         r'/api-reference/generated/\1',
@@ -157,28 +132,38 @@ def fix_links(content: str) -> str:
 
 
 def process_file(basename: str) -> None:
-    """Process a .md file in place: strip HTML, fix links."""
-    md_path = DOCS_DIR / f"{basename}.md"
+    """Process a .md file: extract HTML, fix links, write to .processed.md."""
+    src_path = DOCS_DIR / f"{basename}.md"
+    dst_path = DOCS_DIR / f"{basename}.processed.md"
 
-    if not md_path.exists():
+    if not src_path.exists():
         print(f"⚠️  Skipping {basename}: file not found")
         return
 
-    content = md_path.read_text(encoding='utf-8')
+    content = src_path.read_text(encoding='utf-8')
     original_lines = len(content.split('\n'))
 
-    # Strip HTML
-    content = strip_html(content)
+    # Extract HTML blocks to separate files
+    content, html_files = extract_html_blocks(content, basename)
 
     # Fix links
     content = fix_links(content)
 
-    new_lines = len(content.split('\n'))
-    print(f"📑 {basename}: {original_lines} -> {new_lines} lines")
+    # Add frontmatter with explicit id to match sidebar
+    doc_id = basename.lstrip('0123456789_')
+    frontmatter = f"---\nid: {doc_id}\n---\n\n"
+    content = frontmatter + content
 
-    # Write back to same file
-    md_path.write_text(content, encoding='utf-8')
-    print(f"✅ Updated {md_path.name}")
+    new_lines = len(content.split('\n'))
+    print(f"📑 {basename}: {original_lines} -> {new_lines} lines, {len(html_files)} HTML files")
+
+    # Write to .processed.md
+    dst_path.write_text(content, encoding='utf-8')
+    print(f"✅ Created {dst_path.name}")
+
+    # Remove original to avoid duplicate doc IDs
+    src_path.unlink()
+    print(f"🗑️  Removed {src_path.name}")
 
 
 def main():
