@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """
-Convert Sphinx-Gallery generated markdown files to MDX with pre-computed TOC.
+Process Sphinx-Gallery generated markdown files for Docusaurus.
 
 This script:
-1. Parses headings from markdown files (ignoring those inside code blocks)
-2. Generates a TOC array for Docusaurus
-3. Converts .md to .mdx with the exported TOC
+1. Fixes API links from Sphinx format to Docusaurus format
+2. Adds frontmatter to disable TOC (which crashes on large HTML content)
+3. Injects an inline TOC as markdown
 """
 
 import re
 import sys
 from pathlib import Path
 
-# Files to convert (Sphinx-Gallery generated)
+# Files to process (Sphinx-Gallery generated)
 SPHINX_GALLERY_FILES = [
     "0010_housing_classification",
     "0020_selecting_sampling_context",
@@ -48,7 +48,6 @@ def fix_api_links(content: str) -> str:
 
 def slugify(text: str) -> str:
     """Convert heading text to a URL-friendly slug."""
-    # Lowercase
     slug = text.lower()
     # Remove markdown links, keep text
     slug = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', slug)
@@ -57,7 +56,6 @@ def slugify(text: str) -> str:
     # Replace spaces and special chars with hyphens
     slug = re.sub(r'[^\w\s-]', '', slug)
     slug = re.sub(r'[\s_]+', '-', slug)
-    # Remove leading/trailing hyphens
     slug = slug.strip('-')
     return slug
 
@@ -65,30 +63,25 @@ def slugify(text: str) -> str:
 def extract_headings(content: str) -> list[dict]:
     """
     Extract markdown headings, ignoring those inside code blocks or HTML.
-    Returns list of {value, id, level} dicts.
     """
     headings = []
     in_code_block = False
     in_html_block = False
 
     for line in content.split('\n'):
-        # Track code blocks
         if line.startswith('```'):
             in_code_block = not in_code_block
             continue
 
-        # Track HTML style blocks (common in Sphinx output)
         if '<style' in line.lower():
             in_html_block = True
         if '</style>' in line.lower():
             in_html_block = False
             continue
 
-        # Skip if inside code or HTML
         if in_code_block or in_html_block:
             continue
 
-        # Match markdown headings (# ## ### etc.)
         match = re.match(r'^(#{1,6})\s+(.+)$', line)
         if match:
             level = len(match.group(1))
@@ -97,89 +90,92 @@ def extract_headings(content: str) -> list[dict]:
             # Skip headings that look like code comments or CSS
             if value.startswith(('report', 'Note:', 'Silence')):
                 continue
-            # Skip very short headings that are likely noise
             if len(value) < 3:
                 continue
 
-            heading_id = slugify(value)
             headings.append({
                 'value': value,
-                'id': heading_id,
+                'id': slugify(value),
                 'level': level,
             })
 
     return headings
 
 
-def generate_toc_export(headings: list[dict]) -> str:
-    """Generate the MDX export statement for TOC."""
+def generate_inline_toc(headings: list[dict]) -> str:
+    """Generate an inline TOC as markdown."""
     if not headings:
         return ""
 
-    lines = ["export const toc = ["]
-    for h in headings:
-        # Escape quotes in value
-        value = h['value'].replace("'", "\\'").replace('"', '\\"')
-        lines.append(f"  {{value: '{value}', id: '{h['id']}', level: {h['level']}}},")
-    lines.append("];")
+    lines = ["## Contents", ""]
+    min_level = min(h['level'] for h in headings)
 
+    for h in headings:
+        indent = "  " * (h['level'] - min_level)
+        # Remove markdown formatting from display text
+        display = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', h['value'])
+        display = display.replace('`', '')
+        lines.append(f"{indent}- [{display}](#{h['id']})")
+
+    lines.append("")
     return '\n'.join(lines)
 
 
-def convert_file(basename: str) -> None:
-    """Convert a single .md file to .mdx with TOC."""
-    md_path = DOCS_DIR / f"{basename}.md"
-    mdx_path = DOCS_DIR / f"{basename}.mdx"
+def process_file(basename: str) -> None:
+    """Process a .md file: fix links, add frontmatter, inject TOC, write to .processed.md."""
+    src_path = DOCS_DIR / f"{basename}.md"
+    dst_path = DOCS_DIR / f"{basename}.processed.md"
 
-    if not md_path.exists():
-        print(f"⚠️  Skipping {basename}: .md file not found")
+    if not src_path.exists():
+        print(f"⚠️  Skipping {basename}: file not found")
         return
 
-    content = md_path.read_text(encoding='utf-8')
+    content = src_path.read_text(encoding='utf-8')
 
-    # Fix API links from Sphinx format to Docusaurus format
+    # Fix API links
     content = fix_api_links(content)
 
-    # Extract headings
+    # Extract headings for inline TOC
     headings = extract_headings(content)
     print(f"📑 {basename}: found {len(headings)} headings")
 
-    # Generate TOC export
-    toc_export = generate_toc_export(headings)
+    # Generate inline TOC
+    inline_toc = generate_inline_toc(headings)
 
-    # Check if file already has frontmatter
-    if content.startswith('---'):
-        # Insert TOC export after frontmatter
-        parts = content.split('---', 2)
-        if len(parts) >= 3:
-            new_content = f"---{parts[1]}---\n\n{toc_export}\n\n{parts[2].lstrip()}"
-        else:
-            new_content = f"{toc_export}\n\n{content}"
+    # Build new content with frontmatter
+    # Use explicit id to match sidebar references
+    doc_id = basename.lstrip('0123456789_')
+    frontmatter = f"---\nid: {doc_id}\nhide_table_of_contents: true\n---\n\n"
+
+    # Find where to insert TOC (after first heading)
+    first_heading_match = re.search(r'^#\s+.+$', content, re.MULTILINE)
+    if first_heading_match:
+        insert_pos = first_heading_match.end()
+        new_content = (
+            frontmatter +
+            content[:insert_pos] +
+            "\n\n" + inline_toc + "\n" +
+            content[insert_pos:]
+        )
     else:
-        # Add frontmatter and TOC export
-        new_content = f"{toc_export}\n\n{content}"
+        new_content = frontmatter + inline_toc + "\n" + content
 
-    # Write .mdx file
-    mdx_path.write_text(new_content, encoding='utf-8')
-    print(f"✅ Created {mdx_path.name}")
-
-    # Remove .md file to avoid duplicate doc IDs
-    md_path.unlink()
-    print(f"🗑️  Removed {md_path.name}")
+    # Write to processed file
+    dst_path.write_text(new_content, encoding='utf-8')
+    print(f"✅ Created {dst_path.name}")
 
 
 def main():
-    print("Converting Sphinx-Gallery markdown to MDX with TOC...\n")
+    print("Processing Sphinx-Gallery markdown files...\n")
 
     for basename in SPHINX_GALLERY_FILES:
         try:
-            convert_file(basename)
+            process_file(basename)
         except Exception as e:
-            print(f"❌ Error converting {basename}: {e}")
+            print(f"❌ Error processing {basename}: {e}")
             sys.exit(1)
-        print()
 
-    print("Done! Don't forget to update sidebars.js if needed.")
+    print("\nDone!")
 
 
 if __name__ == "__main__":

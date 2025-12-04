@@ -53,6 +53,8 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
+          // Exclude original Sphinx files (we use .processed.md versions)
+          exclude: ['**/00[0-9][0-9]_*.md'],
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           // editUrl:

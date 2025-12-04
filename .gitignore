@@ -2,5 +2,5 @@ node_modules
 build
 .docusaurus
 
-# Generated MDX files (created from .md by convert_to_mdx.py)
-docs/00*.mdx
+# Generated processed docs (created by process_sphinx_docs.py)
+docs/*.processed.md
