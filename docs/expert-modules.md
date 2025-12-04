@@ -34,26 +34,26 @@ The end-to-end modules provided are fully optimized for each use case, ensuring 
 
 Product categorization is a key task in Commerce, involving the classification of product catalogs into structured categories, out of high-dimensional tabular data. 
 
-Thanks to the product categorization module integrated into the Neuralk API, the entire categorization workflow is designed and optimized from start to finish, with no data preprocessing, feature engineering, or model building and training required on your side. You can easily start categorizing your product catalog with our example [here](/docs/plot_categorization). 
+Thanks to the product categorization module integrated into the Neuralk API, the entire categorization workflow is designed and optimized from start to finish, with no data preprocessing, feature engineering, or model building and training required on your side. You can easily start categorizing your product catalog with our example [here](/docs/categorization).
 
 Learn more on automating product categorization in our [blog article](https://www.neuralk-ai.com/post/automating-product-categorization-with-tabular-ai-why-retailers-cant-afford-to-ignore-it).
 
 <Link
   className="button button--secondary button--quickstart"
-  to="/docs/plot_categorization"
+  to="/docs/categorization"
 >
  Try the Product Categorization module
 </Link>
 
 ### Any industry: Classification module
 
-Classification is a common task across industries, where the goal is to assign binary or multi-class labels to items, events, or records based on their features. 
+Classification is a common task across industries, where the goal is to assign binary or multi-class labels to items, events, or records based on their features.
 
 The Neuralk classification module handles the entire workflow end-to-end. With this expert module you can quickly deploy classification pipelines and deliver actionable insights to your business teams, without building complex ML infrastructure from scratch.
 
 <Link
   className="button button--secondary button--quickstart"
-  to="/docs/plot_two_moon_classification"
+  to="/docs/two_moon_classification"
 >
  Try the Classification module
 </Link>

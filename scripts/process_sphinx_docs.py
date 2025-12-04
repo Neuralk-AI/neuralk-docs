@@ -24,25 +24,31 @@ SPHINX_GALLERY_FILES = [
 DOCS_DIR = Path(__file__).parent.parent / "docs"
 
 
-def fix_api_links(content: str) -> str:
+def fix_links(content: str) -> str:
     """
-    Fix Sphinx-generated API links to match Docusaurus structure.
-
-    Sphinx generates: ../api/generated/neuralk.Classifier.md#neuralk.Classifier
-    Docusaurus expects: /api-reference/generated/neuralk.Classifier
+    Fix Sphinx-generated links to match Docusaurus structure.
     """
     # Fix relative api links to absolute api-reference links
+    # ../api/generated/neuralk.Classifier.md#... -> /api-reference/generated/neuralk.Classifier
     content = re.sub(
         r'\.\./api/generated/([^)#\s]+)\.md(?:#[^)]*)?',
         r'/api-reference/generated/\1',
         content
     )
-    # Also fix any ../api-reference links (just in case)
     content = re.sub(
         r'\.\./api-reference/generated/([^)#\s]+)\.md(?:#[^)]*)?',
         r'/api-reference/generated/\1',
         content
     )
+
+    # Fix internal links to other Sphinx docs
+    # 0010_housing_classification.md#anchor -> /docs/housing_classification#anchor
+    content = re.sub(
+        r'00\d{2}_([^)#\s]+)\.md(#[^)]*)?',
+        r'/docs/\1\2',
+        content
+    )
+
     return content
 
 
@@ -132,8 +138,8 @@ def process_file(basename: str) -> None:
 
     content = src_path.read_text(encoding='utf-8')
 
-    # Fix API links
-    content = fix_api_links(content)
+    # Fix links
+    content = fix_links(content)
 
     # Extract headings for inline TOC
     headings = extract_headings(content)
