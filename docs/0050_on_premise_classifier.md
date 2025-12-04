@@ -10,7 +10,7 @@
 
 # Using the OnPremiseClassifier
 
-The [`OnPremiseClassifier`](../api/generated/neuralk.OnPremiseClassifier.md#neuralk.OnPremiseClassifier) provides a scikit-learn compatible interface
+The [`OnPremiseClassifier`](/api-reference/generated/neuralk.OnPremiseClassifier) provides a scikit-learn compatible interface
 for using Neuralk’s In-Context Learning model with an on-premise or self-hosted
 NICL server. It’s ideal for users who have deployed NICL on their own infrastructure
 or need to work with on-premise deployments.

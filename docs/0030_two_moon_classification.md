@@ -10,7 +10,7 @@
 
 # Neuralk-AI Classification Expert Module
 
-The previous examples have shown how to use the Neuralk [`Classifier`](../api/generated/neuralk.Classifier.md#neuralk.Classifier) to
+The previous examples have shown how to use the Neuralk [`Classifier`](/api-reference/generated/neuralk.Classifier) to
 solve classification problems with Neuralk’s foundational model. However as we
 saw the Classifier is a generic building block, and for complex use-cases it
 should be integrated in a full data-processing pipeline. One option is to build
@@ -33,7 +33,7 @@ Neuralk API.
 
 <!-- GENERATED FROM PYTHON SOURCE LINES 34-38 -->
 
-The first step is to create a [`Neuralk`](../api/generated/neuralk.Neuralk.md#neuralk.Neuralk) client that we will use to
+The first step is to create a [`Neuralk`](/api-reference/generated/neuralk.Neuralk) client that we will use to
 interact with the platform. Note that we chose to make our username and
 password available through environment variables, but you can use other
 approaches to load them.
